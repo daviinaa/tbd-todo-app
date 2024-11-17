@@ -4,4 +4,8 @@ WORKDIR /app
 COPY . .
 RUN pip install -r requirements.txt
 
-CMD ["python", "app/__init__.py"]
+# Change the working directory to ensure proper module imports
+WORKDIR /app/app
+
+# Update the CMD to run from the correct directory
+CMD ["python", "__init__.py"]

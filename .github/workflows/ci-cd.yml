@@ -49,6 +49,13 @@ jobs:
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         run: |
+          # Create .ssh directory if it doesn't exist
+          mkdir -p ~/.ssh
+          # Disable strict host key checking
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+          # Set correct permissions
+          chmod 600 ~/.ssh/config
+          
           sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
           sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
             cd /home/davina &&
@@ -76,6 +83,13 @@ jobs:
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         run: |
+          # Create .ssh directory if it doesn't exist
+          mkdir -p ~/.ssh
+          # Disable strict host key checking
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+          # Set correct permissions
+          chmod 600 ~/.ssh/config
+          
           sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
           sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
             cd /home/davina &&
@@ -103,6 +117,13 @@ jobs:
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         run: |
+          # Create .ssh directory if it doesn't exist
+          mkdir -p ~/.ssh
+          # Disable strict host key checking
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+          # Set correct permissions
+          chmod 600 ~/.ssh/config
+          
           sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
           sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
             cd /home/davina &&

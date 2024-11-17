@@ -41,17 +41,22 @@ jobs:
         with:
           name: docker-image
 
+      - name: Install sshpass
+      run: |
+        sudo apt-get update && sudo apt-get install -y sshpass
+
+
       - name: Deploy to Dev
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          scp tbd-todo-app.tar.gz user@your-test-server:/home/user/
-          ssh user@your-test-server "
-            cd /home/user &&
-            docker load < tbd-todo-app.tar.gz &&
-            export $(cat /home/user/tbd-todo-app/.env.dev | xargs) &&
-            docker-compose --env-file /home/user/tbd-todo-app/.env.dev up -d --build
-          "
+      env:
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      run: |
+        sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
+        sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
+          cd /home/davina &&
+          docker load < tbd-todo-app.tar.gz &&
+          export \$(cat /home/davina/tbd-todo-app/.env.dev | xargs) &&
+          docker-compose --env-file /home/davina/tbd-todo-app/.env.dev up -d --build
+        "
 
   deploy-staging:
     name: Deploy to Staging Environment
@@ -64,17 +69,21 @@ jobs:
         with:
           name: docker-image
 
+      - name: Install sshpass
+      run: |
+        sudo apt-get update && sudo apt-get install -y sshpass
+
       - name: Deploy to Staging
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          scp tbd-todo-app.tar.gz user@your-test-server:/home/user/
-          ssh user@your-test-server "
-            cd /home/user &&
-            docker load < tbd-todo-app.tar.gz &&
-            export $(cat /home/user/tbd-todo-app/.env.staging | xargs) &&
-            docker-compose --env-file /home/user/tbd-todo-app/.env.staging up -d --build
-          "
+      env:
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      run: |
+        sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
+        sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
+          cd /home/davina &&
+          docker load < tbd-todo-app.tar.gz &&
+          export \$(cat /home/davina/tbd-todo-app/.env.staging | xargs) &&
+          docker-compose --env-file /home/davina/tbd-todo-app/.env.staging up -d --build
+        "
 
   deploy-prod:
     name: Deploy to Production Environment
@@ -87,14 +96,19 @@ jobs:
         with:
           name: docker-image
 
+      - name: Install sshpass
+      run: |
+        sudo apt-get update && sudo apt-get install -y sshpass
+
+
       - name: Deploy to Production
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          scp tbd-todo-app.tar.gz user@your-test-server:/home/user/
-          ssh user@your-test-server "
-            cd /home/user &&
-            docker load < tbd-todo-app.tar.gz &&
-            export $(cat /home/user/tbd-todo-app/.env.prod | xargs) &&
-            docker-compose --env-file /home/user/tbd-todo-app/.env.prod up -d --build
-          "
+      env:
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      run: |
+        sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
+        sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
+          cd /home/davina &&
+          docker load < tbd-todo-app.tar.gz &&
+          export \$(cat /home/davina/tbd-todo-app/.env.prod | xargs) &&
+          docker-compose --env-file /home/davina/tbd-todo-app/.env.prod up -d --build
+        "

@@ -28,7 +28,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: docker-image
-          path: tbd-todo-app.tar.gz
+          path: |
+            tbd-todo-app.tar.gz
+            .env*
+            docker-compose.yml
 
   deploy-dev:
     name: Deploy to Dev Environment
@@ -36,6 +39,9 @@ jobs:
     needs: build
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Download Docker Image Artifact
         uses: actions/download-artifact@v3
         with:
@@ -49,19 +55,20 @@ jobs:
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         run: |
-          # Create .ssh directory if it doesn't exist
           mkdir -p ~/.ssh
-          # Disable strict host key checking
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
-          # Set correct permissions
           chmod 600 ~/.ssh/config
           
-          sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
+          sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "mkdir -p /home/davina/tbd-todo-app"
+          
+          sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/tbd-todo-app/
+          sshpass -p "$SSH_PASSWORD" scp docker-compose.yml davina@159.65.211.46:/home/davina/tbd-todo-app/
+          sshpass -p "$SSH_PASSWORD" scp .env.dev davina@159.65.211.46:/home/davina/tbd-todo-app/
+          
           sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
-            cd /home/davina &&
-            docker load < tbd-todo-app.tar.gz &&
-            export \$(cat /home/davina/tbd-todo-app/.env.dev | xargs) &&
-            docker-compose --env-file /home/davina/tbd-todo-app/.env.dev up -d --build
+            cd /home/davina/tbd-todo-app &&
+            sudo docker load < tbd-todo-app.tar.gz &&
+            sudo docker-compose --env-file .env.dev up -d --build
           "
 
   deploy-staging:
@@ -70,6 +77,9 @@ jobs:
     needs: deploy-dev
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Download Docker Image Artifact
         uses: actions/download-artifact@v3
         with:
@@ -83,19 +93,20 @@ jobs:
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         run: |
-          # Create .ssh directory if it doesn't exist
           mkdir -p ~/.ssh
-          # Disable strict host key checking
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
-          # Set correct permissions
           chmod 600 ~/.ssh/config
           
-          sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
+          sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "mkdir -p /home/davina/tbd-todo-app"
+          
+          sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/tbd-todo-app/
+          sshpass -p "$SSH_PASSWORD" scp docker-compose.yml davina@159.65.211.46:/home/davina/tbd-todo-app/
+          sshpass -p "$SSH_PASSWORD" scp .env.staging davina@159.65.211.46:/home/davina/tbd-todo-app/
+          
           sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
-            cd /home/davina &&
-            docker load < tbd-todo-app.tar.gz &&
-            export \$(cat /home/davina/tbd-todo-app/.env.staging | xargs) &&
-            docker-compose --env-file /home/davina/tbd-todo-app/.env.staging up -d --build
+            cd /home/davina/tbd-todo-app &&
+            sudo docker load < tbd-todo-app.tar.gz &&
+            sudo docker-compose --env-file .env.staging up -d --build
           "
 
   deploy-prod:
@@ -104,6 +115,9 @@ jobs:
     needs: deploy-staging
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Download Docker Image Artifact
         uses: actions/download-artifact@v3
         with:
@@ -117,17 +131,18 @@ jobs:
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
         run: |
-          # Create .ssh directory if it doesn't exist
           mkdir -p ~/.ssh
-          # Disable strict host key checking
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
-          # Set correct permissions
           chmod 600 ~/.ssh/config
           
-          sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/
+          sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "mkdir -p /home/davina/tbd-todo-app"
+          
+          sshpass -p "$SSH_PASSWORD" scp tbd-todo-app.tar.gz davina@159.65.211.46:/home/davina/tbd-todo-app/
+          sshpass -p "$SSH_PASSWORD" scp docker-compose.yml davina@159.65.211.46:/home/davina/tbd-todo-app/
+          sshpass -p "$SSH_PASSWORD" scp .env.prod davina@159.65.211.46:/home/davina/tbd-todo-app/
+          
           sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
-            cd /home/davina &&
-            docker load < tbd-todo-app.tar.gz &&
-            export \$(cat /home/davina/tbd-todo-app/.env.prod | xargs) &&
-            docker-compose --env-file /home/davina/tbd-todo-app/.env.prod up -d --build
+            cd /home/davina/tbd-todo-app &&
+            sudo docker load < tbd-todo-app.tar.gz &&
+            sudo docker-compose --env-file .env.prod up -d --build
           "

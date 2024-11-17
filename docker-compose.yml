@@ -1,0 +1,9 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "${APP_PORT}:5000"
+    environment:
+      FLASK_ENV: ${FLASK_ENV}
+      ENABLE_NEW_UI: ${ENABLE_NEW_UI}

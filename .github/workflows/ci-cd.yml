@@ -6,6 +6,12 @@ on:
       - main
 
 jobs:
+  unit-testing:
+    name: runs unit tests for feature PRs
+    runs-on: ubuntu-latest
+    branch-paths: feature/*
+
+  
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
@@ -33,6 +39,43 @@ jobs:
         with:
           name: deploy-package
           path: deploy.tar.gz
+          
+deploy-dev:
+    name: Deploy to Dev Environment
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: deploy-package
+
+      - name: Install sshpass
+        run: |
+          sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy to Dev
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+          
+          sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "mkdir -p /home/davina/tbd-todo-app"
+          sshpass -p "$SSH_PASSWORD" scp deploy.tar.gz davina@159.65.211.46:/home/davina/tbd-todo-app/
+          
+          sshpass -p "$SSH_PASSWORD" ssh davina@159.65.211.46 "
+            cd /home/davina/tbd-todo-app &&
+            tar -xzf deploy.tar.gz &&
+            sudo docker load < tbd-todo-app.tar.gz &&
+            sudo docker-compose --env-file .env.dev up -d --build
+          
+approval-gates by QA:
+    who can approve this stage to run?
+      yes/no
+      depending on the review 
 
   deploy-dev:
     name: Deploy to Dev Environment
@@ -66,6 +109,10 @@ jobs:
             sudo docker load < tbd-todo-app.tar.gz &&
             sudo docker-compose --env-file .env.dev up -d --build
           "
+approval-gates:
+    who can approve this stage to run?
+      yes/no
+      depending on the review 
 
   deploy-staging:
     name: Deploy to Staging Environment
@@ -99,7 +146,11 @@ jobs:
             sudo docker load < tbd-todo-app.tar.gz &&
             sudo docker-compose --env-file .env.staging up -d --build
           "
-
+  approval-gates:
+    who can approve this stage to run?
+      yes/no
+      depending on the review 
+      
   deploy-prod:
     name: Deploy to Production Environment
     runs-on: ubuntu-latest
